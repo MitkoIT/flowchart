@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from "react-router-dom";
 import { ReactFlow, addEdge, MiniMap, Controls, Background } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import axios from 'axios';
 
 const initialNodes = [
-  {
+  /*{
     id: '1',
     position: { x: 20, y: 20 },
     data: { label: '1' },
@@ -58,7 +59,7 @@ const initialNodes = [
     targetPosition: 'left',
     row: 2,
     //hidden: true
-  },
+  },*/
 ];
 
 const edgeStyles = {
@@ -67,16 +68,17 @@ const edgeStyles = {
 };
 
 const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2', style: edgeStyles },
+  /*{ id: 'e1-2', source: '1', target: '2', style: edgeStyles },
   { id: 'e1-3', source: '1', target: '3', style: edgeStyles },
   { id: 'e3-6', source: '3', target: '6', style: edgeStyles },
   { id: 'e4-5', source: '4', target: '5', style: edgeStyles },
-  { id: 'e1-7', source: '1', target: '7', style: edgeStyles },
+  { id: 'e1-7', source: '1', target: '7', style: edgeStyles },*/
+  { id: 'e1-7', source: '248', target: '1507', style: edgeStyles },
+  { id: 'e1-8', source: '248', target: '336', style: edgeStyles },
 ];
 
 function Diagram() {
-  let { id } = useParams();
-
+  const { resourceId } = useParams();
   const [elements, setElements] = useState(initialNodes);
   const [memory, setMemory] = useState(initialNodes);
   const [choosedNodes, setChoosedNodes] = useState([]);
@@ -103,6 +105,7 @@ function Diagram() {
       }
     });
 
+    //console.log(nodes);
     setElements(nodes);
   };
 
@@ -140,16 +143,32 @@ function Diagram() {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}resource/${resourceId}`);
+
+        setMemory(response.data.nodes);
+        setElements(response.data.nodes);
+      } catch (error) {
+        console.error('There was an error making the request:', error);
+      }
+    };
+    
+    fetchData();
+  }, [resourceId]);
+
+  /*useEffect(() => {
     getFirstRowNodes();
-  }, []);
+  }, []);*/
+
+  useEffect(() => {
+    getFirstRowNodes();
+  }, [memory]);
 
   useEffect(() => {}, [elements]);
 
-  console.log(id);
-
   return (
     <>
-      <h1>Diagram</h1>
       <div style={{ width: '100vw', height: '100vh', background: 'orange' }}>
         <ReactFlow
           nodes={elements}
