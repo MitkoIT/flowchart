@@ -4,85 +4,12 @@ import { ReactFlow, addEdge, MiniMap, Controls, Background } from '@xyflow/react
 import '@xyflow/react/dist/style.css';
 import axios from 'axios';
 
-const initialNodes = [
-  /*{
-    id: '1',
-    position: { x: 20, y: 20 },
-    data: { label: '1' },
-    sourcePosition: 'right',
-    row: 1,
-  },
-  {
-    id: '2',
-    position: { x: 220, y: 20 },
-    data: { label: '2' },
-    targetPosition: 'left',
-    row: 2,
-    //hidden: true,
-  },
-  {
-    id: '3',
-    position: { x: 220, y: 100 },
-    data: { label: '3' },
-    targetPosition: 'left',
-    sourcePosition: 'right',
-    row: 2,
-    //hidden: true
-  },
-  {
-    id: '4',
-    position: { x: 20, y: 100 },
-    data: { label: '4' },
-    sourcePosition: 'right',
-    row: 1,
-  },
-  {
-    id: '5',
-    position: { x: 220, y: 20 },
-    data: { label: '5' },
-    targetPosition: 'left',
-    row: 2,
-    //hidden: true
-  },
-  {
-    id: '6',
-    position: { x: 420, y: 20 },
-    data: { label: '6' },
-    targetPosition: 'left',
-    row: 3,
-    //hidden: true
-  },
-  {
-    id: '7',
-    position: { x: 220, y: 180 },
-    data: { label: '7' },
-    targetPosition: 'left',
-    row: 2,
-    //hidden: true
-  },*/
-];
-
-const edgeStyles = {
-  stroke: '#000',
-  strokeWidth: 2,
-};
-
-const initialEdges = [
-  /*{ id: 'e1-2', source: '1', target: '2', style: edgeStyles },
-  { id: 'e1-3', source: '1', target: '3', style: edgeStyles },
-  { id: 'e3-6', source: '3', target: '6', style: edgeStyles },
-  { id: 'e4-5', source: '4', target: '5', style: edgeStyles },
-  { id: 'e1-7', source: '1', target: '7', style: edgeStyles },*/
-  { id: 'e1-7', source: '248', target: '1507', style: edgeStyles },
-  { id: 'e1-8', source: '248', target: '336', style: edgeStyles },
-];
-
 function Diagram() {
   const { resourceId } = useParams();
-  const [elements, setElements] = useState(initialNodes);
-  const [memory, setMemory] = useState(initialNodes);
+  const [elements, setElements] = useState([]);
+  const [memory, setMemory] = useState([]);
   const [choosedNodes, setChoosedNodes] = useState([]);
-  const [edges, setEdges] = useState(initialEdges);
+  const [edges, setEdges] = useState([]);
 
   const getChildNodes = (parentId) => {
     let childs = [];
@@ -105,7 +32,6 @@ function Diagram() {
       }
     });
 
-    //console.log(nodes);
     setElements(nodes);
   };
 
@@ -117,17 +43,24 @@ function Diagram() {
 
     memory.forEach((el) => {
       const elNode = document.querySelector(`[data-testid="rf__node-${el.id}"]`);
+      
       if (elNode) {
         elNode.style.backgroundColor = '#fff';
       }
 
       if (el.row === 1) {
+        const choosedNode = document.querySelector(`[data-testid="rf__node-${choosedNodes[0].id}"]`);
+
+        if (choosedNode) {
+          choosedNode.style.backgroundColor = 'lightgreen';
+        }
+
         nodes.push(el);
       } else {
         choosedNodes.forEach((choosed) => {
           const childs = getChildNodes(choosed.id);
           const choosedNode = document.querySelector(`[data-testid="rf__node-${choosed.id}"]`);
-        
+
           if (choosedNode) {
             choosedNode.style.backgroundColor = 'lightgreen';
           }
@@ -147,8 +80,8 @@ function Diagram() {
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}resource/${resourceId}`);
 
-        setMemory(response.data.nodes);
-        setElements(response.data.nodes);
+        setMemory(response.data.structure.nodes);
+        setEdges(response.data.structure.edges);
       } catch (error) {
         console.error('There was an error making the request:', error);
       }
@@ -157,22 +90,18 @@ function Diagram() {
     fetchData();
   }, [resourceId]);
 
-  /*useEffect(() => {
-    getFirstRowNodes();
-  }, []);*/
-
   useEffect(() => {
     getFirstRowNodes();
   }, [memory]);
 
-  useEffect(() => {}, [elements]);
+  useEffect(() => {}, [elements, edges]);
 
   return (
     <>
       <div style={{ width: '100vw', height: '100vh', background: 'orange' }}>
         <ReactFlow
           nodes={elements}
-          edges={initialEdges}
+          edges={edges}
           onNodeClick={toggle}
         />
       </div>
