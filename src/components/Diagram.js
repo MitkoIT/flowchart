@@ -78,7 +78,7 @@ function Diagram() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}resource/${resourceId}`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}resources/${resourceId}/structure`);
 
         setMemory(response.data.structure.nodes);
         setEdges(response.data.structure.edges);

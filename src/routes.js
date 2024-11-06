@@ -10,7 +10,7 @@ const routes = [
   },
   {
     key: 1,
-    path: '/resource/:resourceId',
+    path: '/resources/:resourceId/structure',
     elements: [
       <Diagram key={0}/>
     ]
